@@ -119,5 +119,22 @@ WHERE product_rank IN (1,2,3)
 ORDER BY country, product_rank
 
 -- Query #5
-
+/*
+Show each customer's spending trend over time. For each customer, calculate their total spending per month. 
+Then, rank each month's spending within that customer's history (1 = highest month, 2 = second highest, etc.).
+Show customer_id, the month, total spending that month, and the rank. Order results by customer_id and rank.
+*/
+SELECT 
+	customer_id,
+	DATE_TRUNC('month', invoice_date) AS invoice_month,
+	SUM(unit_price * quantity) AS total_spend,
+	DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY SUM(unit_price * quantity) DESC) AS monthly_rank
+FROM retail
+WHERE customer_id IS NOT NULL
+GROUP BY
+	customer_id,
+	DATE_TRUNC('month', invoice_date)
+ORDER BY
+	customer_id,
+	monthly_rank
 
